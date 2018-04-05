@@ -1,0 +1,82 @@
+<html>
+
+<head>
+	
+</head>
+
+<script>
+	"use strict";
+	
+	function updateCSVLink() {
+		var files = document.getElementById('file').files,
+			columns = document.getElementById('columns').value,
+			filename,
+			fileReader;
+		
+		if(files.length < 1) {
+			alert("No file selected");
+			
+			return;
+		}
+		
+		filename = files[0].name;
+		console.log(filename + ', ' + files[0].size + ' bytes');
+		
+		fileReader = new FileReader();
+		fileReader.onload = function(event) {
+			var preview = document.getElementById('preview'),
+				splitData = fileReader.result.replace(/\r?[\r*\n]/g, '\n').split(/[\n]/),
+				output = '',
+				downloadHREF,
+				downloadLink = document.getElementById('download-link'),
+				i;
+			
+			for(i = 0; i < splitData.length; i++) {
+				output += splitData[i];
+				
+				if(((i + 1) % columns) === 0) {
+					output += '\n';
+				}
+				else {
+					output += ',';
+				}
+			}
+			
+			preview.innerText = output;
+			
+			downloadHREF = URL.createObjectURL(new Blob([output], {type: 'text/plain'}));
+			downloadLink.download = filename.substr(0, filename.length - 4) + '.csv';
+			downloadLink.href = downloadHREF;
+			
+			return;
+		};
+		fileReader.readAsText(files[0]);
+		
+		return;
+	}
+	
+</script>
+
+<body>
+	<div>
+		<h3>This webapp allows you to convert a single column (newline-separated) text file into a multi-column table CSV file</h3>
+		
+		<div>
+			<div>
+				<label>Text file to convert: </label>
+				<input id="file" type='file' onchange="updateCSVLink();">
+			</div>
+			
+			<div>
+				<label>Number of columns to covert to:</label>
+				<input id="columns" type='number' min="1" value="2" max="999" maxlength="3" onchange="updateCSVLink();">
+				<a id='download-link'><button>Download CSV</button></a>
+			</div>
+			
+			<h4>Preview:</h4>
+			<output id="preview"></output>
+		</div>
+	</div>
+</body>
+
+</html>
