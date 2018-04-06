@@ -11,7 +11,12 @@
 		var files = document.getElementById('file').files,
 			columns = document.getElementById('columns').value,
 			filename,
-			fileReader;
+			fileReader,
+			downloadButton = document.getElementById('download-button');
+		
+		document.getElementById('preview').innerText = "Parsing...";
+		downloadButton.onclick = null;
+		downloadButton.disabled = true;
 		
 		if(files.length < 1) {
 			alert("No file selected");
@@ -28,11 +33,11 @@
 				splitData = fileReader.result.replace(/\r?[\r*\n]/g, '\n').split(/[\n]/),
 				output = '',
 				downloadHREF,
-				downloadLink = document.getElementById('download-link'),
+				downloadLink = document.createElement('a'),
 				i;
 			
 			for(i = 0; i < splitData.length; i++) {
-				output += splitData[i];
+				output += '"' + splitData[i] + '"';
 				
 				if(((i + 1) % columns) === 0) {
 					output += '\n';
@@ -47,6 +52,12 @@
 			downloadHREF = URL.createObjectURL(new Blob([output], {type: 'text/plain'}));
 			downloadLink.download = filename.substr(0, filename.length - 4) + '.csv';
 			downloadLink.href = downloadHREF;
+			
+			downloadButton.onclick = function() {
+				return downloadLink.click();
+			}
+			
+			downloadButton.disabled = false;
 			
 			return;
 		};
@@ -70,7 +81,7 @@
 			<div>
 				<label>Number of columns to covert to:</label>
 				<input id="columns" type='number' min="1" value="2" max="999" maxlength="3" onchange="updateCSVLink();">
-				<a id='download-link'><button>Download CSV</button></a>
+				<button id='download-button' disabled>Download CSV</button>
 			</div>
 			
 			<h4>Preview:</h4>
